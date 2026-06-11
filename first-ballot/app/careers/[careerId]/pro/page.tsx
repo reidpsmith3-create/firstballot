@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { createNewsItem } from "@/lib/news";
 import { calculateProspectStatus } from "@/lib/sim/prospect";
 import {
   proDevelopmentOptions,
@@ -183,6 +184,22 @@ export default function ProMonthPage() {
         importance: isMlbDebut ? "milestone" : "major",
       });
     }
+    if (promoted) {
+  await createNewsItem({
+    worldId: career.world_id,
+    careerId: career.id,
+    year: career.current_year,
+    month: career.current_month ?? "April",
+    category: isMlbDebut ? "MLB DEBUT" : "PROMOTION",
+    headline: isMlbDebut
+      ? `${career.full_name} reaches The Show`
+      : `${career.full_name} promoted to ${result.promotion.nextLevel}`,
+    body: isMlbDebut
+      ? "The long climb through the minors is complete. Hall Score is now visible."
+      : result.promotion.reason,
+    importance: isMlbDebut ? "legendary" : "major",
+  });
+}
 
     if (nextCalendar.seasonEnded) {
       await supabase.from("career_events").insert({
@@ -276,6 +293,16 @@ if (
     description: `${career.full_name} climbed to #${prospectStatus.overallRank} on the MLB Top 100 prospects list.`,
     importance: "major",
   });
+  await createNewsItem({
+  worldId: career.world_id,
+  careerId: career.id,
+  year: career.current_year,
+  month: career.current_month ?? "April",
+  category: "PROSPECT WATCH",
+  headline: `${career.full_name} enters MLB Top 100`,
+  body: `${career.full_name} is now ranked #${prospectStatus.overallRank} among baseball prospects.`,
+  importance: "major",
+});
 }
 
 router.push(`/careers/${career.id}`);

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { createNewsItem } from "@/lib/news";
 import { supabase } from "@/lib/supabase";
 import {
   simulateCollegeSeason,
@@ -131,6 +132,18 @@ export default function CollegeSeasonPage() {
   awards: result.awards,
   postseason: result.postseason,
 });
+if (draftProjection.round <= 2) {
+  await createNewsItem({
+    worldId: (career as any).world_id,
+    careerId: career.id,
+    year: career.current_year,
+    month: career.current_month ?? "College Season",
+    category: "DRAFT STOCK",
+    headline: `${career.full_name} viewed as ${draftProjection.label} talent`,
+    body: `Scouts now project ${career.full_name} around pick ${draftProjection.pick}.`,
+    importance: "major",
+  });
+}
 
     const updatedRatings = {
       contact: clampRating(ratings.contact + result.ratingChanges.contact + focusMods.contactGrowth),
@@ -214,6 +227,31 @@ hall_score_after: draftProjection.pick,
         importance: "major",
       });
     }
+    if (
+  result.postseason === "College World Series" ||
+  result.postseason === "National Champions"
+) {
+  await createNewsItem({
+    worldId: (career as any).world_id,
+    careerId: career.id,
+    year: career.current_year,
+    month: "June",
+    category:
+      result.postseason === "National Champions"
+        ? "NATIONAL CHAMPIONS"
+        : "OMAHA BOUND",
+    headline:
+      result.postseason === "National Champions"
+        ? `${school.name} wins it all`
+        : `${school.name} reaches Omaha`,
+    body:
+      result.postseason === "National Champions"
+        ? `${career.full_name} helped power ${school.name} to a national championship.`
+        : `${career.full_name} helped lead ${school.name} to the College World Series.`,
+    importance:
+      result.postseason === "National Champions" ? "legendary" : "major",
+  });
+}
 
     const { error: ratingsError } = await supabase
       .from("career_ratings")

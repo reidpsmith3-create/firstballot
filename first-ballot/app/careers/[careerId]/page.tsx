@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import CareerBottomNav from "@/components/CareerBottomNav";
 
 type PageProps = {
   params: Promise<{
@@ -35,6 +36,12 @@ export default async function CareerDashboardPage({ params }: PageProps) {
     .eq("career_id", careerId)
     .order("created_at", { ascending: false })
     .limit(5);
+    const { data: newsItems } = await supabase
+  .from("news_items")
+  .select("*")
+  .eq("career_id", careerId)
+  .order("created_at", { ascending: false })
+  .limit(5);
 
   if (!career) {
     return (
@@ -48,7 +55,7 @@ export default async function CareerDashboardPage({ params }: PageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-950 px-6 py-10 text-white">
+    <main className="min-h-screen bg-zinc-950 px-5 pb-28 pt-6 text-white">
       <div className="mx-auto max-w-6xl">
         <Link
           href={`/worlds/${career.world_id}`}
@@ -74,12 +81,21 @@ export default async function CareerDashboardPage({ params }: PageProps) {
               </p>
             </div>
 
-            <Link
-  href={getAdvanceHref(career)}
-  className="rounded-xl bg-yellow-400 px-5 py-3 text-center font-bold text-zinc-950 hover:bg-yellow-300"
->
-  {getAdvanceLabel(career)}
-</Link>
+            <div className="flex w-full flex-col gap-3 md:w-auto">
+  <Link
+    href={getAdvanceHref(career)}
+    className="rounded-xl bg-yellow-400 px-5 py-3 text-center font-bold text-zinc-950 hover:bg-yellow-300"
+  >
+    {getAdvanceLabel(career)}
+  </Link>
+
+  <Link
+    href={`/careers/${career.id}/history`}
+    className="rounded-xl border border-zinc-700 px-5 py-3 text-center font-bold text-white hover:bg-zinc-800"
+  >
+    Career History
+  </Link>
+</div>
           </div>
 
           <div className="mt-8 grid gap-4 md:grid-cols-4">
@@ -211,7 +227,28 @@ export default async function CareerDashboardPage({ params }: PageProps) {
               )}
             </div>
           </div>
+<section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
+  <h2 className="text-2xl font-black">News Feed</h2>
 
+  <div className="mt-4 space-y-3">
+    {!newsItems || newsItems.length === 0 ? (
+      <p className="text-zinc-400">No headlines yet.</p>
+    ) : (
+      newsItems.map((item) => (
+        <div
+          key={item.id}
+          className="rounded-xl border border-zinc-800 bg-zinc-950 p-4"
+        >
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-yellow-400">
+            {item.category}
+          </p>
+          <p className="mt-2 text-lg font-black">{item.headline}</p>
+          <p className="mt-1 text-sm text-zinc-400">{item.body}</p>
+        </div>
+      ))
+    )}
+  </div>
+</section>
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
             <h2 className="text-2xl font-black">Timeline</h2>
 
@@ -234,9 +271,16 @@ export default async function CareerDashboardPage({ params }: PageProps) {
             </div>
           </div>
         </section>
-      </div>
+            </div>
+
+      <CareerBottomNav
+        careerId={career.id}
+        worldId={career.world_id}
+        active="career"
+      />
     </main>
   );
+}
 }
 
 function StatBox({ label, value }: { label: string; value: string | number }) {

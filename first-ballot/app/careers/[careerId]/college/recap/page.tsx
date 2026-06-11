@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import CareerBottomNav from "@/components/CareerBottomNav";
 
 type PageProps = {
   params: Promise<{
@@ -39,7 +40,7 @@ export default async function CollegeRecapPage({ params }: PageProps) {
   const awards = Array.isArray(season.awards) ? season.awards : [];
 
   return (
-    <main className="min-h-screen bg-zinc-950 px-5 py-6 text-white">
+    <main className="min-h-screen bg-zinc-950 px-5 pb-28 pt-6 text-white">
       <div className="mx-auto max-w-md">
         <p className="text-sm font-semibold uppercase tracking-[0.25em] text-yellow-400">
           Season Recap
@@ -73,23 +74,23 @@ export default async function CollegeRecapPage({ params }: PageProps) {
         </section>
 
         <section className="mt-4 rounded-3xl border border-zinc-800 bg-zinc-900 p-6">
-  <h2 className="text-xl font-black">Draft Stock</h2>
+          <h2 className="text-xl font-black">Draft Stock</h2>
 
-  <div className="mt-4 grid grid-cols-2 gap-3">
-    <Stat
-      label="Projection"
-      value={season.hall_track_after ?? "Unknown"}
-    />
-    <Stat
-      label="Projected Pick"
-      value={
-        season.hall_score_after
-          ? `Pick ${Math.round(season.hall_score_after)}`
-          : "-"
-      }
-    />
-  </div>
-</section>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <Stat
+              label="Projection"
+              value={season.hall_track_after ?? "Unknown"}
+            />
+            <Stat
+              label="Projected Pick"
+              value={
+                season.hall_score_after
+                  ? `Pick ${Math.round(season.hall_score_after)}`
+                  : "-"
+              }
+            />
+          </div>
+        </section>
 
         <section className="mt-4 rounded-3xl border border-zinc-800 bg-zinc-900 p-6">
           <h2 className="text-xl font-black">Your Season</h2>
@@ -134,6 +135,12 @@ export default async function CollegeRecapPage({ params }: PageProps) {
           Continue Career
         </Link>
       </div>
+
+      <CareerBottomNav
+        careerId={career.id}
+        worldId={career.world_id}
+        active="career"
+      />
     </main>
   );
 }
